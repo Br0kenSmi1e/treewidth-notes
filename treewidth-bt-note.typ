@@ -118,52 +118,25 @@ For the left candidate, vertex 2 witnesses the missing edge $13$, vertex 4 witne
 The first test forbids an outside component from having the whole candidate as its boundary. The second ensures that component boundaries account for every missing edge inside it. Together they are necessary and sufficient; this is the BT characterization theorem [1, Theorem 3.15; 4, Theorem 2.4]. Individual PMCs are candidates, not bags that must all coexist in one optimal decomposition.
 
 #pagebreak()
-= What does a BT state remember?
-Assume first that $G$ is connected and nonempty. We want to solve one connected region $C$, but the region must eventually attach to the rest of the decomposition. Its boundary is $S=N_G(C)$: every edge leaving $C$ ends in $S$.
+= Recursing on the remaining pieces
+Section 4 tells us which bags to try: the PMCs. *After choosing one, repeat the bag choice inside each remaining connected piece.* The only extra requirement is that the next bag must contain the boundary shared with its parent.
 
-A *full block* $(S,C)$ is such a region where $S$ is a minimal separator and $C$ is a component of $G-S$ with $N_G(C)=S$. The word “full” means that every vertex of $S$ really is used by the boundary. The same boundary can have several full components, so the state records *both* $S$ and $C$.
+On the six-cycle, suppose we chose the parent bag $\{1,5,6\}$. The remaining interior is $C=\{2,3,4\}$, with boundary $S=\{1,5\}$. Try $Omega=\{1,3,5\}$ next: it keeps that boundary and includes vertex 3. This leaves vertices 2 and 4 as separate child interiors.
 
-== The condition that makes pieces fit
-The subproblem is not simply “find the treewidth of $G[S union C]$.” It is:
-#note[The state in words.][Find the smallest width of a decomposition of $G[S union C]$ in which *some bag contains all of $S$*. That bag is where this piece can attach to its parent.]
+#figure(block-step-figure(), caption: [One choice of next bag. Vertex 2 needs boundary 1, 3; vertex 4 needs boundary 3, 5. Vertex 6 is already on the parent side.])
 
-#figure(boundary-figure(), caption: [For $S=\{1,3\}$ and $C=\{2\}$ in the six-cycle, the path alone has width 1. Requiring a common boundary bag raises the optimum to 2. The dashed edge enforces that requirement.])
+Repeat for each child: vertex 2 needs bag $\{1,2,3\}$, and vertex 4 needs bag $\{3,4,5\}$. Nothing remains inside these children, so recursion stops. All three new bags have width 2; this choice therefore scores $max(2,2,2)=2$. Try other permitted next bags and keep the smallest score.
 
-== Why completing the boundary is exactly right
-Define the *realization* by adding all missing edges within $S$:
-$ R(S,C) = G[S union C] + "clique on " S, quad F(S,C)=tw(R(S,C)). $
-This is equivalent to the condition above, in both directions:
-+ If a decomposition already has a bag containing $S$, every added edge is covered by that bag. The decomposition remains valid at the same width.
-+ In a decomposition of $R(S,C)$, the clique $S$ must lie in one bag. Deleting the fill edges leaves a valid decomposition of the original subgraph, with the required attachment bag.
+*This becomes dynamic programming by saving answers.* Write $F(S,C)$ for the best width of a decomposition of $S union C$ with an attachment bag containing $S$. Whenever another choice produces the same interior and boundary, reuse that answer. The recurrence is
+$ F(S,C)=min_(Omega in Pi(G), S subset.neq Omega subset.eq S union C)
+  max(|Omega|-1,F(S_1,C_1),dots,F(S_r,C_r)). $
+Here $C_i$ are the remaining components inside $C$, and $S_i=N_G(C_i)$ their boundaries in the original graph. Requiring $S subset.neq Omega$ preserves the attachment and makes the interior smaller. BT’s theorem guarantees that these PMC choices suffice [1, Corollary 4.8]. With no children, the score is just $|Omega|-1$.
 
-The fact that every clique fits in a bag follows from the connected-occurrence rule: the subtrees for its vertices intersect pairwise, and pairwise-intersecting subtrees of a tree have a common node.
+For the formal state description, completing $S$ into a clique enforces the attachment bag. Call this graph $R(S,C)$, the *realization*; then $F(S,C)=tw(R(S,C))$. The states are *full blocks*: $S$ is a minimal separator and $C$ a component of $G-S$ with $N_G(C)=S$. Each child is again a full block, so compute smaller interiors first.
 
-#note[Fill edges are structural, not new problem constraints.][We use the completion to search for a decomposition. When solving independent set on the original graph, vertices joined *only by fill* may still both be selected. Testing independence in the completed graph would solve a different problem.]
+#note[The whole idea.][Choose the next bag that makes the largest required piece as small as possible. *Minimize over alternative bags; take the maximum over all children of each choice.*]
 
-#pagebreak()
-= Derive the recurrence, one choice at a time
-For a full block $(S,C)$, choose its attachment bag $Omega$. BT’s structural theorem says that it suffices to try PMCs of the original graph satisfying
-$ S subset.neq Omega subset.eq S union C. $
-The bag contains the old boundary and at least one interior vertex. Remove it. Let $C_1,dots,C_r$ be the components of $G[C without Omega]$, and set $S_i=N_G(C_i)$ in the *original graph*. All exits from $C$ lie in $S subset.eq Omega$, so these are also components of $G-Omega$. Their boundaries lie in $Omega$. The PMC theorem makes each $S_i$ a minimal separator, so $(S_i,C_i)$ is another full block.
-
-#figure(recurrence-figure(), caption: [One candidate creates several required child problems. Their widths are not added: the largest bag anywhere determines the width.])
-
-== One candidate costs a maximum; alternatives give a minimum
-Once $Omega$ is fixed, its own bag costs $|Omega|-1$. Every child must also be solved. If $q$ denotes the cost of this choice, then
-$ q(Omega;S,C) = max(|Omega|-1, F(S_1,C_1), dots, F(S_r,C_r)). $
-We can choose the candidate, so the optimal state value is
-#block(width: 100%, fill: rgb("EFF4FA"), inset: 10pt, radius: 4pt)[
-$ F(S,C) = min_(Omega in Pi(G), S subset.neq Omega subset.eq S union C) q(Omega;S,C). $
-]
-With no children, $q=|Omega|-1$. Every child has fewer interior vertices than $C$, so evaluate states in increasing $|C|$. The strict inclusion $S subset.neq Omega$ ensures progress; choosing only the old boundary would leave the interior unchanged.
-
-== The root has no old boundary
-Try any PMC as the first bag and solve every component left outside it:
-$ tw(G) = min_(Omega in Pi(G)) max (\{|Omega|-1\} union
-  \{F(N_G(C),C) : C in cc(G-Omega)\}). $
-For a complete graph, $Omega=V$ has no children and costs $|V|-1$. For a disconnected nonempty graph, solve its connected components separately and take the maximum. We use $tw(emptyset)=-1$ for the empty graph.
-
-#note[An equivalent yes/no view.][To achieve width at most $k$, *there must exist* an admissible bag of size at most $k+1$ for which *every* child has width at most $k$. “Some choice, all children” is precisely the minimum–maximum structure.]
+At the global root there is no fixed boundary: try every PMC as the first bag and solve all components outside it. The next section shows this final step.
 
 #pagebreak()
 = A complete example: the six-cycle

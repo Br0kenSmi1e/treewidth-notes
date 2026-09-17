@@ -1,6 +1,6 @@
 # Treewidth and the Bouchitté–Todinca algorithm
 
-A ten-page illustrated note, written in Typst with seven editable CeTZ diagrams, revised after an online cross-check of primary papers and teaching material.
+A nine-page illustrated note, written in Typst with six editable CeTZ diagrams, revised after an online cross-check of primary papers and teaching material.
 
 - **`main.typ`** — your original draft, preserved unchanged.
 - **`treewidth-bt-note.pdf`** — compiled illustrated note.

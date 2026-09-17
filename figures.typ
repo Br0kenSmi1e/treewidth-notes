@@ -125,6 +125,42 @@
   label((0,-1),[$max (|Omega|-1, F(S_1,C_1), F(S_2,C_2), F(S_3,C_3))$])
 })
 
+#let block-step-figure() = canvas({
+  import draw: *
+  let p = hexpoints.map(q => (q.at(0) - 3.6, q.at(1)))
+  // Vertex 6 belongs to the already chosen parent side, not this state.
+  for i in range(6) {
+    let j = calc.rem(i + 1, 6)
+    if i >= 4 {
+      line(p.at(i),p.at(j),stroke:(paint:muted,thickness:.8pt,dash:"dotted"))
+    } else { edge(p.at(i),p.at(j)) }
+  }
+  for (i,j) in ((1,3),(3,5),(1,5)) {edge(p.at(i - 1),p.at(j - 1),fill:true)}
+  for i in range(6) {
+    let col = if i == 5 {muted} else if (0,4).contains(i) {teal} else {blue}
+    node(p.at(i),str(i+1),color:col,fill:if (0,4).contains(i) {pale} else {white})
+  }
+  label((-3.6,2.35),[Old boundary $S=\{1,5\}$],color:teal)
+  label((-3.6,1.95),[Interior $C=\{2,3,4\}$],color:blue)
+  label((-3.6,-2.0),[Choose $Omega=\{1,3,5\}$],color:amber)
+  label((-3.6,-2.5),[Vertex 6 stays outside this subproblem.],size:9pt)
+
+  let parent = (2.4,2.1); let root = (2.4,.65)
+  edge(parent,root)
+  edge(root,(.65,-1.1)); edge(root,(4.15,-1.1))
+  bag(parent,[1, 5, 6],width:2)
+  bag(root,[1, 3, 5],accent:true,width:2)
+  bag((.65,-1.1),[1, 2, 3],width:2)
+  bag((4.15,-1.1),[3, 4, 5],width:2)
+  label((2.4,2.75),[One possible continuation],color:blue)
+  label((4.4,1.4),[old overlap: 1, 5],size:9pt)
+  label((.4,.0),[overlap: 1, 3],size:9pt)
+  label((4.45,.0),[overlap: 3, 5],size:9pt)
+  label((.65,-1.75),[$C_1=\{2\}$],color:blue)
+  label((4.15,-1.75),[$C_2=\{4\}$],color:blue)
+  label((2.4,-2.5),[Only two children: the old parent is not a child.],size:9pt)
+})
+
 #let worked-figure() = canvas({
   import draw: *
   cycle-six(shift:(-3.5,0),selected:(1,3,5),fills:((1,3),(3,5),(1,5)))

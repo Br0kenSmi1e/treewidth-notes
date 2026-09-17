@@ -60,8 +60,12 @@ The dedicated fetch tool encountered fake-IP DNS restrictions. The online full t
 7. **State the real theorem dependency:** the ability to restrict attachment bags to original-graph PMCs is a BT theorem, not something that follows merely from splitting components.
 8. **Separate guarantees:** original versus later DP bounds; enumeration versus combination costs; exact search versus restricted-family upper bounds.
 
+## Follow-up: merging the recursion explanation
+
+The former Sections 5–6 were shortened from three pages to one and then merged into Section 5, “Recursing on the remaining pieces.” It explicitly continues Section 4's candidate-bag search: choose a bag, repeat inside each remaining piece, and save answers for reuse. One six-cycle example, one diagram, and one recurrence explain the process. The detailed attachment proof and repeated general derivation were removed; the state definition and candidate restrictions remain.
+
 ## Checks
 
-- `typst compile treewidth-bt-note.typ treewidth-bt-note.pdf` succeeds; ten pages, seven CeTZ figures. Rendered pages were visually checked for layout and legibility.
+- `typst compile treewidth-bt-note.typ treewidth-bt-note.pdf` succeeds; nine pages, six CeTZ figures. Rendered pages were visually checked for layout and legibility.
 - `python3 tests/verify_bt.py`: the scalar PMC/full-block recurrence agrees with exhaustive elimination on every labeled graph with 1–5 vertices (1,099 graphs), the six-cycle, and 60 seeded random graphs with 6–7 vertices.
 - These finite checks are regression evidence, not a proof. Exactness rests on the cited structural theorems and the decomposition gluing argument.
